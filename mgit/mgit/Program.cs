@@ -193,7 +193,7 @@ namespace mgit
 
             // translate native language to English
 
-            var prompt = "Translate the following commit message to English:\n\"\"\"\n" + message + "\n\"\"\"";
+            var prompt = "Translate the following commit message to English:\n\"\"\"\n json format : {text: string}" + message + "\n\"\"\"";
             var translatedMessage = llmClient.GetCompletion(prompt).Result.Trim();
             
             Console.WriteLine("  " + message);
