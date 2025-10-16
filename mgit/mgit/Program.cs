@@ -148,7 +148,7 @@ namespace mgit
                 {
                     using var repo = new Repository(repoPath);
                     var status = repo.RetrieveStatus();
-                    
+
                     Console.WriteLine($"Repository: {repoPath}");
                     foreach (var item in status)
                     {
@@ -192,13 +192,12 @@ namespace mgit
             }
 
             // 커밋 메세지 영어로 번역. 번역 문장만 반환
-            var prompt = "Translate the following commit message to English. Only provide the translated message without any additional text:\n\"\"\"\n" + message + "\n\"\"\"";
-
-            // var prompt = "Translate the following commit message to English:\n\"\"\"\n" + message + "\n\"\"\"";
+            var prompt =
+                "Translate the following commit message to English. Only provide the translated message without any additional text:\n\"\"\"\n" +
+                message + "\n\"\"\"";
             var translatedMessage = llmClient.GetCompletion(prompt).Result.Trim();
-            
-            Console.WriteLine("  " + message);
-            Console.WriteLine("  -> " + translatedMessage);
+
+            Console.WriteLine($"  {message} -> {translatedMessage}");
 
             foreach (var repoPath in _appConfig.Repos)
             {
