@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Diagnostics;
+using CommandLine;
 using LibGit2Sharp;
 using mgit.Config;
 using mgit.Llm.Client;
@@ -9,6 +10,7 @@ using CommitOptions = mgit.Options.CommitOptions;
 using StatusOptions = mgit.Options.StatusOptions;
 using AddOptions = mgit.Options.AddOptions;
 using CheckoutOptions = mgit.Options.CheckoutOptions;
+using PushOptions = mgit.Options.PushOptions;
 
 
 namespace mgit
@@ -21,9 +23,9 @@ namespace mgit
         {
             Parser.Default
                 .ParseArguments<InitOptions, StatusOptions, LogOptions, CheckoutOptions, AddOptions, BranchOptions,
-                    CommitOptions>(args)
+                    CommitOptions, PushOptions>(args)
                 .MapResult<InitOptions, StatusOptions, LogOptions, CheckoutOptions, AddOptions, BranchOptions,
-                    CommitOptions, int>(
+                    CommitOptions, PushOptions, int>(
                     RunInit,
                     RunStatus,
                     RunLog,
@@ -31,8 +33,97 @@ namespace mgit
                     RunAdd,
                     RunBranch,
                     RunCommit,
+                    RunPush,
                     errs => 0
                 );
+        }
+
+        private static int RunPush(PushOptions arg)
+        {
+            LoadAppConfig();
+
+            if (_appConfig == null)
+            {
+                throw new InvalidOperationException("AppConfig is not loaded");
+            }
+
+            foreach (var repoPath in _appConfig.Repos)
+            {
+                try
+                {
+                    using var repo = new Repository(repoPath);
+                    var remote = repo.Network.Remotes["origin"];
+                    if (remote == null)
+                    {
+                        Console.WriteLine($"  No remote 'origin' found in repository '{repoPath}'.");
+                        continue;
+                    }
+                    
+                    var creds = GetGitCredentials(remote.Url);
+                    if (creds == null)
+                    {
+                        Console.WriteLine("  No cached credentials found.");
+                        continue;
+                    }
+
+                    var options = new LibGit2Sharp.PushOptions
+                    {
+                        CredentialsProvider = (url, user, cred) =>
+                            new UsernamePasswordCredentials
+                            {
+                                Username = creds.Value.username,
+                                Password = creds.Value.password
+                            }
+                    };
+
+                    repo.Network.Push(remote, @"refs/heads/" + repo.Head.FriendlyName, options);
+                    Console.WriteLine($"  Pushed to remote 'origin' in repository '{repoPath}'.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  Error pushing in {repoPath}: {ex.Message}");
+                }
+            }
+
+            return 0;
+        }
+        
+        static (string username, string password)? GetGitCredentials(string url)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "git",
+                Arguments = "credential fill",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            };
+
+            using var process = Process.Start(psi);
+            if (process == null)
+                return null;
+
+            // Git credential-helper 프로토콜에 맞게 요청
+            process.StandardInput.WriteLine($"url={url}");
+            process.StandardInput.WriteLine();
+            process.StandardInput.Flush();
+
+            string output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            string? user = null, pass = null;
+            foreach (var line in output.Split('\n'))
+            {
+                if (line.StartsWith("username="))
+                    user = line.Substring("username=".Length).Trim();
+                if (line.StartsWith("password="))
+                    pass = line.Substring("password=".Length).Trim();
+            }
+
+            if (user != null && pass != null)
+                return (user, pass);
+
+            return null;
         }
 
         private static int RunLog(LogOptions arg)
