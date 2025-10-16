@@ -191,8 +191,8 @@ namespace mgit
                 throw new InvalidOperationException("Failed to create LLM client");
             }
 
-            // 커밋 메세지를 영어로 번역하고 json { text: string} 형태로 리턴하시오
-            var prompt = "Translate the following commit message to English in a concise manner:\n\"\"\"\n" + message + "\n\"\"\"";
+            // 커밋 메세지 영어로 번역. 번역 문장만 반환
+            var prompt = "Translate the following commit message to English. Only provide the translated message without any additional text:\n\"\"\"\n" + message + "\n\"\"\"";
 
             // var prompt = "Translate the following commit message to English:\n\"\"\"\n" + message + "\n\"\"\"";
             var translatedMessage = llmClient.GetCompletion(prompt).Result.Trim();
