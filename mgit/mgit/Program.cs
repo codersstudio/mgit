@@ -10,6 +10,7 @@ using CommitOptions = mgit.Options.CommitOptions;
 using StatusOptions = mgit.Options.StatusOptions;
 using AddOptions = mgit.Options.AddOptions;
 using CheckoutOptions = mgit.Options.CheckoutOptions;
+using PullOptions = mgit.Options.PullOptions;
 using PushOptions = mgit.Options.PushOptions;
 
 
@@ -22,13 +23,16 @@ namespace mgit
         private static void Main(string[] args)
         {
             Parser.Default
-                .ParseArguments<InitOptions, StatusOptions, LogOptions, CheckoutOptions, AddOptions, BranchOptions,
+                .ParseArguments<InitOptions, StatusOptions, LogOptions, PullOptions, CheckoutOptions, AddOptions,
+                    BranchOptions,
                     CommitOptions, PushOptions>(args)
-                .MapResult<InitOptions, StatusOptions, LogOptions, CheckoutOptions, AddOptions, BranchOptions,
+                .MapResult<InitOptions, StatusOptions, LogOptions, PullOptions, CheckoutOptions, AddOptions,
+                    BranchOptions,
                     CommitOptions, PushOptions, int>(
                     RunInit,
                     RunStatus,
                     RunLog,
+                    RunPull,
                     RunCheckout,
                     RunAdd,
                     RunBranch,
@@ -36,6 +40,60 @@ namespace mgit
                     RunPush,
                     errs => 0
                 );
+        }
+
+        private static int RunPull(PullOptions arg)
+        {
+            LoadAppConfig();
+
+            if (_appConfig == null)
+            {
+                throw new InvalidOperationException("AppConfig is not loaded");
+            }
+
+            foreach (var repoPath in _appConfig.Repos)
+            {
+                try
+                {
+                    using var repo = new Repository(repoPath);
+                    var remote = repo.Network.Remotes["origin"];
+                    if (remote == null)
+                    {
+                        Console.WriteLine($"  No remote 'origin' found in repository '{repoPath}'.");
+                        continue;
+                    }
+
+                    var creds = GetGitCredentials(remote.Url);
+                    if (creds == null)
+                    {
+                        Console.WriteLine("  No cached credentials found.");
+                        continue;
+                    }
+
+                    var options = new LibGit2Sharp.PullOptions
+                    {
+                        FetchOptions = new FetchOptions
+                        {
+                            CredentialsProvider = (url, user, cred) =>
+                                new UsernamePasswordCredentials
+                                {
+                                    Username = creds.Value.username,
+                                    Password = creds.Value.password
+                                }
+                        }
+                    };
+
+                    var signature = new Signature("mgit", _appConfig.Author.Email, DateTimeOffset.Now);
+                    Commands.Pull(repo, signature, options);
+                    Console.WriteLine($"  Pulled from remote 'origin' in repository '{repoPath}'.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  Error pulling in {repoPath}: {ex.Message}");
+                }
+            }
+
+            return 0;
         }
 
         private static int RunPush(PushOptions arg)
@@ -58,7 +116,7 @@ namespace mgit
                         Console.WriteLine($"  No remote 'origin' found in repository '{repoPath}'.");
                         continue;
                     }
-                    
+
                     var creds = GetGitCredentials(remote.Url);
                     if (creds == null)
                     {
@@ -87,7 +145,7 @@ namespace mgit
 
             return 0;
         }
-        
+
         static (string username, string password)? GetGitCredentials(string url)
         {
             var psi = new ProcessStartInfo
