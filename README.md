@@ -26,31 +26,31 @@ Developers often work on projects that are split across multiple repositories. `
     This will scan for all Git repositories in the subdirectories and create a `mgit.yml` file in your current directory.
 
 2.  **Configure `mgit.yml`**:
-    After initialization, you must edit the `mgit.yml` file to configure your repositories, author details, and preferred LLM provider. The file has three main sections: `repos`, `author`, and `llm`.
+    After initialization, you must edit the `mgit.yml` file to configure your repositories, author details, and preferred LLM provider. The file has three main sections: `llm`, `author`, and `repos`.
 
-    - **`repos`**: A list of absolute paths to the Git repositories you want to manage.
-    - **`author`**: Your default commit author information.
-        - `name`: Your name.
-        - `email`: Your email address.
     - **`llm`**: Configuration for the AI service that translates commit messages.
         - `provider`: The LLM provider to use. Supported values are `Ollama`, `Gemini`, or `Chatgpt`.
         - `model`: The specific model name (e.g., `gpt-oss:20b`, `gemini-pro`).
         - `url`: The base URL for the LLM provider's API. This is primarily for self-hosted providers like Ollama (e.g., `http://localhost:11434`).
         - `apiKey`: Your API key for the selected service (if required).
+    - **`author`**: Your default commit author information.
+        - `name`: Your name.
+        - `email`: Your email address.
+    - **`repos`**: A list of absolute paths to the Git repositories you want to manage.
 
     **Example `mgit.yml`:**
     ```yaml
-    repos:
-      - D:\dev\project-a
-      - D:\dev\codersstudio_mgit\mgit
-    author:
-      name: coders
-      email: coders.ceo@gmail.com
     llm:
       provider: "ollama"
       model: "gpt-oss:20b"
       url: "http://localhost:11434"
       apiKey: ""
+    author:
+      name: your-name
+      email: your-email@example.com
+    repos:
+      - /path/to/your/repo1
+      - /path/to/your/repo2
     ```
 
 ## Usage
