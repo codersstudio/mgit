@@ -5,6 +5,15 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Title>coders</Title>
+        <Authors>coders</Authors>
+        <PackageId>mgit</PackageId>
+        <Version>0.1.0</Version>
+        <Description>mgit lets you run common git workflows across many repositories from one CLI.</Description>
+        <PackageTags>git;cli;automation;mgit</PackageTags>
+        <RepositoryUrl>https://github.com/codersstudio/mgit</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageProjectUrl>https://github.com/codersstudio/mgit</PackageProjectUrl>
     </PropertyGroup>
 
     <ItemGroup>
