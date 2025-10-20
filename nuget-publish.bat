@@ -4,7 +4,7 @@ if not defined NUGET_API_KEY (
     exit /b 1
 )
 
-set VERSION=0.1.0
+set VERSION=0.1.1
 set SOURCE=https://api.nuget.org/v3/index.json
 
 set PROJ=mgit\mgit\mgit.csproj

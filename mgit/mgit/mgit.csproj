@@ -8,8 +8,17 @@
         <Title>coders</Title>
         <Authors>coders</Authors>
         <PackageId>mgit</PackageId>
-        <Version>0.1.0</Version>
+        <PackAsTool>true</PackAsTool>
+        <Version>0.1.1</Version>
+        <AssemblyVersion>0.1.1</AssemblyVersion>
+        <FileVersion>0.1.1</FileVersion>
+
+        <!-- NuGet Package Metadata -->
+        <PackageId>mgit</PackageId>
+        <Title>mgit</Title>
+        <Authors>coders</Authors>
         <Description>mgit lets you run common git workflows across many repositories from one CLI.</Description>
+        <Copyright>Copyright (c) 2024 coders</Copyright>
         <PackageTags>git;cli;automation;mgit</PackageTags>
         <RepositoryUrl>https://github.com/codersstudio/mgit</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
