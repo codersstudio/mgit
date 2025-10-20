@@ -10,6 +10,7 @@ using CommitOptions = mgit.Options.CommitOptions;
 using StatusOptions = mgit.Options.StatusOptions;
 using AddOptions = mgit.Options.AddOptions;
 using CheckoutOptions = mgit.Options.CheckoutOptions;
+using MergeOptions = mgit.Options.MergeOptions;
 using PullOptions = mgit.Options.PullOptions;
 using PushOptions = mgit.Options.PushOptions;
 
@@ -25,10 +26,10 @@ namespace mgit
             Parser.Default
                 .ParseArguments<InitOptions, StatusOptions, LogOptions, PullOptions, CheckoutOptions, AddOptions,
                     BranchOptions,
-                    CommitOptions, PushOptions>(args)
+                    CommitOptions, PushOptions, MergeOptions>(args)
                 .MapResult<InitOptions, StatusOptions, LogOptions, PullOptions, CheckoutOptions, AddOptions,
                     BranchOptions,
-                    CommitOptions, PushOptions, int>(
+                    CommitOptions, PushOptions, MergeOptions, int>(
                     RunInit,
                     RunStatus,
                     RunLog,
@@ -38,8 +39,51 @@ namespace mgit
                     RunBranch,
                     RunCommit,
                     RunPush,
+                    RunMerge,
                     errs => 0
                 );
+        }
+
+        private static int RunMerge(MergeOptions arg)
+        {
+            LoadAppConfig();
+
+            if (_appConfig == null)
+            {
+                throw new InvalidOperationException("AppConfig is not loaded");
+            }
+
+            foreach (var repoPath in _appConfig.Repos)
+            {
+                try
+                {
+                    using var repo = new Repository(repoPath);
+                    var branch = repo.Branches[arg.Branch];
+                    if (branch == null)
+                    {
+                        Console.WriteLine($"  Branch '{arg.Branch}' not found in repository '{repoPath}'.");
+                        continue;
+                    }
+
+                    var signature = new Signature("mgit", _appConfig.Author.Email, DateTimeOffset.Now);
+                    var result = repo.Merge(branch, signature);
+                    if (result.Status == MergeStatus.Conflicts)
+                    {
+                        Console.WriteLine($"  Merge conflicts occurred in repository '{repoPath}'.");
+                    }
+                    else
+                    {
+                        Console.WriteLine(
+                            $"  Merged branch '{arg.Branch}' into current branch in repository '{repoPath}'.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  Error merging branch in {repoPath}: {ex.Message}");
+                }
+            }
+
+            return 0;
         }
 
         private static int RunPull(PullOptions arg)
