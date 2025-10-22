@@ -7,7 +7,7 @@ if not defined NUGET_API_KEY (
 set VERSION=0.1.1
 set SOURCE=https://api.nuget.org/v3/index.json
 
-set PROJ=mgit\mgit\mgit.csproj
+set PROJ=mgit\mgit.csproj
 set PKG_NAME=mgit
 
 set OUTPUT_DIR=nupkg
