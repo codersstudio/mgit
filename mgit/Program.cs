@@ -65,7 +65,7 @@ namespace mgit
                         continue;
                     }
 
-                    var signature = new Signature("mgit", _appConfig.Author.Email, DateTimeOffset.Now);
+                    var signature = new Signature(_appConfig.Author.Name, _appConfig.Author.Email, DateTimeOffset.Now);
                     var result = repo.Merge(branch, signature);
                     if (result.Status == MergeStatus.Conflicts)
                     {
@@ -127,7 +127,7 @@ namespace mgit
                         }
                     };
 
-                    var signature = new Signature("mgit", _appConfig.Author.Email, DateTimeOffset.Now);
+                    var signature = new Signature(_appConfig.Author.Name, _appConfig.Author.Email, DateTimeOffset.Now);
                     Commands.Pull(repo, signature, options);
                     Console.WriteLine($"  Pulled from remote 'origin' in repository '{repoPath}'.");
                 }
@@ -398,7 +398,7 @@ namespace mgit
                 {
                     using var repo = new Repository(repoPath);
                     Commands.Stage(repo, "*");
-                    var author = new Signature("mgit", _appConfig.Author.Email, DateTimeOffset.Now);
+                    var author = new Signature(_appConfig.Author.Name, _appConfig.Author.Email, DateTimeOffset.Now);
                     var committer = author;
                     repo.Commit(translatedMessage, author, committer);
                 }
