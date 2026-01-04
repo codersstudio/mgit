@@ -40,24 +40,39 @@ public class CommitRunner : Runner
         // var prompt =
         //     "Translate the following commit message to English. Only provide the translated message without any additional text:\n\"\"\"\n" +
         //     message + "\n\"\"\"";
-        var translatedMessage = llmClient.GetCompletion(prompt).Result.Trim();
+        var jsonResponse = llmClient.GetCompletion(prompt).Result.Trim();
+
+        if (_options.Debug)
+        {
+            Console.WriteLine(jsonResponse);
+        }
+
+        var response = CommitFormatResponse.Parse(jsonResponse);
+
+        var breaking = "";
+        if (response.Breaking)
+        {
+            breaking = "!";
+        }
+
+        var translatedMessage = $"{response.Type}({response.Scope}){breaking}: {response.Subject}";
 
         Console.WriteLine($"  {message} -> {translatedMessage}");
 
         foreach (var repoPath in AppConfig.Repos)
         {
-            // try
-            // {
-            //     using var repo = new Repository(repoPath);
-            //     Commands.Stage(repo, "*");
-            //     var author = new Signature(AppConfig.Author.Name, AppConfig.Author.Email, DateTimeOffset.Now);
-            //     var committer = author;
-            //     repo.Commit(translatedMessage, author, committer);
-            // }
-            // catch (Exception ex)
-            // {
-            //     Console.WriteLine($"  Error committing in {repoPath}: {ex.Message}");
-            // }
+            try
+            {
+                using var repo = new Repository(repoPath);
+                Commands.Stage(repo, "*");
+                var author = new Signature(AppConfig.Author.Name, AppConfig.Author.Email, DateTimeOffset.Now);
+                var committer = author;
+                repo.Commit(translatedMessage, author, committer);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  Error committing in {repoPath}: {ex.Message}");
+            }
         }
 
 

@@ -3,7 +3,7 @@
 namespace mgit.Options;
 
 [Verb("branch", HelpText = "Manage branches in the repository.")]
-public class BranchOptions
+public class BranchOptions : BaseOptions
 {
     [Option('c', "create", HelpText = "Create a new branch with the specified name.")]
     public string? Create { get; set; }
