@@ -1,8 +1,5 @@
-﻿using CommandLine;
+﻿namespace mgit.Options;
 
-namespace mgit.Options;
-
-[Verb("status", HelpText = "Show the status of the repositories.")]
 public class StatusOptions : BaseOptions
 {
 }

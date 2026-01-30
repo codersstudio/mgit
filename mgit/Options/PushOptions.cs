@@ -1,8 +1,5 @@
-﻿using CommandLine;
+﻿namespace mgit.Options;
 
-namespace mgit.Options;
-
-[Verb("push", HelpText = "Push changes to the remote repositories.")]
 public class PushOptions : BaseOptions
 {
 }

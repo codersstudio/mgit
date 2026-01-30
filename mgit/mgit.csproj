@@ -28,7 +28,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1"/>
         <PackageReference Include="DotnetGeminiSDK" Version="2.0.0"/>
         <PackageReference Include="LibGit2Sharp" Version="0.31.0"/>
         <PackageReference Include="OllamaSharp" Version="5.4.7"/>
