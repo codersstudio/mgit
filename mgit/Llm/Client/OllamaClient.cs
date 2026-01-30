@@ -26,13 +26,13 @@ public class OllamaClient : LlmClient
                 Model = _apiClient.SelectedModel,
                 Prompt = source,
                 Stream = false,
-                // Raw = true,
-                // Options = new RequestOptions
-                // {
-                //     Temperature = 0f, // 온도 설정
-                //     TopP = 0, // Top P 설정
-                // }
-                // 스트리밍 모드 활성화
+                Options = new RequestOptions
+                {
+                    NumThread = Math.Max(1, Environment.ProcessorCount),
+                    NumBatch = 512,
+                    F16kv = true,
+                    UseMmap = true
+                }
             };
 
             var res = _apiClient.GenerateAsync(request);
