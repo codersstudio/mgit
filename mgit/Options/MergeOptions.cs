@@ -2,5 +2,5 @@
 
 public class MergeOptions : BaseOptions
 {
-    public string Branch { get; set; }
+    public required string Branch { get; set; }
 }

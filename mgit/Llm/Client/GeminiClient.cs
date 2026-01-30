@@ -15,7 +15,9 @@ public class GeminiClient : LlmClient
             ApiKey = Environment.GetEnvironmentVariable(llmOptions.ApiKey) ?? string.Empty,
             TextBaseUrl = "https://generativelanguage.googleapis.com/v1beta/models/" + llmOptions.Model,
         };
+#pragma warning disable CS0618 // No DI container in CLI entrypoint; keep legacy ctor for now.
         _geminiClient = new DotnetGeminiSDK.Client.GeminiClient(config);
+#pragma warning restore CS0618
     }
 
     public override async Task<string> GetCompletion(string prompt)
