@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Threading.Tasks;
 using mgit.Config;
 using mgit.Options;
 using mgit.Runner;
@@ -34,11 +35,20 @@ namespace mgit
             var logNumberOption = new Option<int>(new[] { "-n", "--number" },
                 () => 3,
                 "Number of commits to show.");
+            var logNumberArgument = new Argument<int?>("number",
+                () => null,
+                "Number of commits to show (overrides -n/--number).");
             var logCommand = new Command("log", "Show the commit logs of the repositories.");
             logCommand.AddOption(logNumberOption);
+            logCommand.AddArgument(logNumberArgument);
             logCommand.SetHandler(
-                (int number, bool debug) => RunLog(new LogOptions { Number = number, Debug = debug }),
+                (int numberOption, int? numberArgument, bool debug) =>
+                {
+                    var count = numberArgument ?? numberOption;
+                    return Task.FromResult(RunLog(new LogOptions { Number = count, Debug = debug }));
+                },
                 logNumberOption,
+                logNumberArgument,
                 debugOption
             );
             root.AddCommand(logCommand);
@@ -66,11 +76,17 @@ namespace mgit
 
             var addPathOption = new Option<string?>(new[] { "-p", "--path" },
                 "Path to the file or directory to add. Defaults to all files.");
+            var addPathArgument = new Argument<string?>("path",
+                () => null,
+                "Path to the file or directory to add. Defaults to all files.");
             var addCommand = new Command("add", "Add file contents to the index.");
             addCommand.AddOption(addPathOption);
+            addCommand.AddArgument(addPathArgument);
             addCommand.SetHandler(
-                (string? path, bool debug) => RunAdd(new AddOptions { Path = path, Debug = debug }),
+                (string? pathOption, string? pathArgument, bool debug) =>
+                    RunAdd(new AddOptions { Path = pathOption ?? pathArgument, Debug = debug }),
                 addPathOption,
+                addPathArgument,
                 debugOption
             );
             root.AddCommand(addCommand);
@@ -104,13 +120,26 @@ namespace mgit
             var commitMessageOption = new Option<string>(new[] { "-m", "--message" },
                 "Commit message.")
             {
-                IsRequired = true
+                IsRequired = false
             };
+            var commitMessageArgument = new Argument<string?>("message",
+                "Commit message rendered to the translator.");
             var commitCommand = new Command("commit", "Commit changes to the repository.");
             commitCommand.AddOption(commitMessageOption);
+            commitCommand.AddArgument(commitMessageArgument);
             commitCommand.SetHandler(
-                (string message, bool debug) => RunCommit(new CommitOptions { Message = message, Debug = debug }),
+                (string? messageOption, string? messageArgument, bool debug) =>
+                {
+                    var message = messageOption ?? messageArgument;
+                    if (string.IsNullOrEmpty(message))
+                    {
+                        throw new ArgumentException("Commit message is required");
+                    }
+
+                    return Task.FromResult(RunCommit(new CommitOptions { Message = message, Debug = debug }));
+                },
                 commitMessageOption,
+                commitMessageArgument,
                 debugOption
             );
             root.AddCommand(commitCommand);

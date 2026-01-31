@@ -84,6 +84,9 @@ Commits the staged changes. The commit message will be automatically translated 
 ```sh
 mgit commit -m "내 첫 커밋"
 # The tool will translate "내 첫 커밋" to "My first commit" and use it.
+
+# You can still pass the message directly without the flag:
+mgit commit '리펙토링'
 ```
 
 ### `push`
@@ -122,4 +125,7 @@ Shows the commit logs for all repositories.
 ```sh
 # Show the most recent 10 logs
 mgit log -n 10
+
+# Pass a number directly
+mgit log 10
 ```
